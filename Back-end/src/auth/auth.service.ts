@@ -18,7 +18,7 @@ export class AuthService {
   ): Promise<UserDocument | null> {
     const user = await this.usersService.findOne(email);
     if (user && user.password === pass) {
-       return user 
+      return user as UserDocument; 
     }
     return null;
   }
