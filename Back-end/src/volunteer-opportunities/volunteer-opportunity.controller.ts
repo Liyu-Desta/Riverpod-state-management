@@ -52,7 +52,7 @@ export class VolunteerOpportunitiesController {
   }
   //volunteers(users) booking
 
-  @Post(':id/book')
+  @Post(':bookingid')
   @UseGuards(JwtAuthGuard) // Open to all authenticated users
   async bookOpportunity(@Req() req, @Param('id') opportunityId: string) {
     const userId = req.user.userId; // Accessing "userId" from req.user
