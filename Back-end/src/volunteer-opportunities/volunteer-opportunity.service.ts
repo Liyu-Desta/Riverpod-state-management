@@ -27,6 +27,8 @@ export class VolunteerOpportunitiesService {
       .findByIdAndUpdate(id, opportunityData, { new: true })
       .exec();
   }
+  
+
 
   async remove(id: string): Promise<VolunteerOpportunity> {
     return this.opportunityModel.findOneAndDelete({ _id: id }).exec();
@@ -65,6 +67,11 @@ export class VolunteerOpportunitiesService {
     return this.bookingModel
       .find({ opportunity: opportunityId })
       .populate('user')
+      .exec();
+  }
+  async updateBooking(bookingId: string, bookingData): Promise<Booking> {
+    return this.bookingModel
+      .findByIdAndUpdate(bookingId, bookingData, { new: true })
       .exec();
   }
 }

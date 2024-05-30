@@ -5,6 +5,7 @@ import { VolunteerOpportunity } from './volunteer-opportunity.model';
 export interface Booking extends Document {
   user: mongoose.Types.ObjectId | User;
   opportunity: mongoose.Types.ObjectId | VolunteerOpportunity;
+  date: String;
 }
 
 export const BookingSchema = new Schema<Booking>({
@@ -14,6 +15,7 @@ export const BookingSchema = new Schema<Booking>({
     ref: 'VolunteerOpportunity',
     required: true,
   },
+  date : {type: String},
   // Additional fields as necessary
 });
 

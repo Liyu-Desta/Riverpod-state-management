@@ -76,4 +76,11 @@ export class VolunteerOpportunitiesController {
   async getOpportunityBookings(@Param('id') opportunityId: string) {
     return this.opportunitiesService.getOpportunityBookings(opportunityId);
   }
+
+  @Put('bookings/:bookingId')
+  
+  async updateBooking(@Param('id') id: string, @Body() bookingData) {
+    return this.opportunitiesService.updateBooking(id, bookingData);
+  }
+
 }
