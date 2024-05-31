@@ -60,3 +60,17 @@ Refresh requested types: Encryption Keys}
 Refresh requested types: Encryption Keys}
 {"logTime": "0531/173105", "correlationVector":"AMQU7fg8Y2eAACcz40ralv.1","action":"SyncServerConnectionManagerRequest", "result":"SYNC_SERVER_OK", "context":{"environment":"Prod_WestEurope_x00e", "migrationStage":"NotStarted", "server":"GENERAL0200001M"}}
 {"logTime": "0531/173105", "correlationVector":"AMQU7fg8Y2eAACcz40ralv.2","action":"GetUpdates Response", "result":"Success", "context":Received 0 update(s). cV=AMQU7fg8Y2eAACcz40ralv.0;server=GENERAL0200001M;cloudType=Consumer;environment=Prod_WestEurope_x00e;migrationStage=NotStarted}
+{"logTime": "0531/181443", "correlationVector":"k+jYlGUVyQH+TS8JwfFust.1","action":"SyncServerConnectionManagerRequest", "result":"SYNC_SERVER_OK", "context":{"environment":"Prod_WestEurope_x00e", "migrationStage":"NotStarted", "server":"GENERAL01000005"}}
+{"logTime": "0531/181445", "correlationVector":"k+jYlGUVyQH+TS8JwfFust","action":"Initial GetUpdates", "result":"", "context":Reason: NEW_CLIENT. cV=k+jYlGUVyQH+TS8JwfFust}
+{"logTime": "0531/181447", "correlationVector":"k+jYlGUVyQH+TS8JwfFust.2","action":"GetUpdates Response", "result":"Success", "context":Received 1 update(s). cV=k+jYlGUVyQH+TS8JwfFust.0;server=GENERAL01000005;cloudType=Consumer;environment=Prod_WestEurope_x00e;migrationStage=NotStarted}
+{"logTime": "0531/181449", "correlationVector":"CLm3om1s0P69z58d8BXnwz","action":"Normal GetUpdate request", "result":"", "context":cV=CLm3om1s0P69z58d8BXnwz
+Refresh requested types: Encryption Keys}
+{"logTime": "0531/181450", "correlationVector":"CLm3om1s0P69z58d8BXnwz.1","action":"SyncServerConnectionManagerRequest", "result":"SYNC_SERVER_OK", "context":{"environment":"Prod_WestEurope_x00e", "migrationStage":"NotStarted", "server":"GENERAL0200002E"}}
+{"logTime": "0531/181452", "correlationVector":"CLm3om1s0P69z58d8BXnwz.2","action":"GetUpdates Response", "result":"Success", "context":Received 0 update(s). cV=CLm3om1s0P69z58d8BXnwz.0;server=GENERAL0200002E;cloudType=Consumer;environment=Prod_WestEurope_x00e;migrationStage=NotStarted}
+{"logTime": "0531/182016", "correlationVector":"icecy/AeO7QK1PlDxsbwUr.1","action":"SyncServerConnectionManagerRequest", "result":"SYNC_SERVER_OK", "context":{"environment":"Prod_WestEurope_000l", "migrationStage":"NotStarted", "server":"GENERAL03000027"}}
+{"logTime": "0531/182016", "correlationVector":"icecy/AeO7QK1PlDxsbwUr","action":"Initial GetUpdates", "result":"", "context":Reason: NEW_CLIENT. cV=icecy/AeO7QK1PlDxsbwUr}
+{"logTime": "0531/182017", "correlationVector":"icecy/AeO7QK1PlDxsbwUr.2","action":"GetUpdates Response", "result":"Success", "context":Received 1 update(s). cV=icecy/AeO7QK1PlDxsbwUr.0;server=GENERAL03000027;cloudType=Consumer;environment=Prod_WestEurope_000l;migrationStage=NotStarted}
+{"logTime": "0531/182017", "correlationVector":"EYPTGlQk/lCw3q+Xqij8SZ","action":"Normal GetUpdate request", "result":"", "context":cV=EYPTGlQk/lCw3q+Xqij8SZ
+Refresh requested types: Encryption Keys}
+{"logTime": "0531/182018", "correlationVector":"EYPTGlQk/lCw3q+Xqij8SZ.1","action":"SyncServerConnectionManagerRequest", "result":"SYNC_SERVER_OK", "context":{"environment":"Prod_NorthEurope_000h", "migrationStage":"NotStarted", "server":"GENERAL0300002R"}}
+{"logTime": "0531/182018", "correlationVector":"EYPTGlQk/lCw3q+Xqij8SZ.2","action":"GetUpdates Response", "result":"Success", "context":Received 0 update(s). cV=EYPTGlQk/lCw3q+Xqij8SZ.0;server=GENERAL0300002R;cloudType=Consumer;environment=Prod_NorthEurope_000h;migrationStage=NotStarted}
