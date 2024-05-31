@@ -79,11 +79,11 @@ class AppRouter {
         builder: (BuildContext context, GoRouterState state) =>
              UserList(),
       ),
-      GoRoute(
-        path: AppPath.profile,
-        builder: (context, GoRouterState state) =>
-             AdminProfilePage(),
-      ),
+      // GoRoute(
+      //   path: AppPath.profile,
+      //   builder: (context, GoRouterState state) =>
+      //        AdminProfilePage(),
+      // ),
     ],
   );
 }
