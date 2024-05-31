@@ -171,9 +171,9 @@
     },
     {
       "name": "file_selector_macos",
-      "rootUri": "file:///C:/Users/Lamrot/AppData/Local/Pub/Cache/hosted/pub.dev/file_selector_macos-0.9.3+3",
+      "rootUri": "file:///C:/Users/Lamrot/AppData/Local/Pub/Cache/hosted/pub.dev/file_selector_macos-0.9.4",
       "packageUri": "lib/",
-      "languageVersion": "2.19"
+      "languageVersion": "3.1"
     },
     {
       "name": "file_selector_platform_interface",
@@ -197,7 +197,13 @@
       "name": "flutter",
       "rootUri": "file:///C:/Users/Lamrot/Desktop/mobile_practice/flutter/packages/flutter",
       "packageUri": "lib/",
-      "languageVersion": "3.2"
+      "languageVersion": "3.3"
+    },
+    {
+      "name": "flutter_hooks",
+      "rootUri": "file:///C:/Users/Lamrot/AppData/Local/Pub/Cache/hosted/pub.dev/flutter_hooks-0.18.6",
+      "packageUri": "lib/",
+      "languageVersion": "2.17"
     },
     {
       "name": "flutter_lints",
@@ -207,9 +213,9 @@
     },
     {
       "name": "flutter_plugin_android_lifecycle",
-      "rootUri": "file:///C:/Users/Lamrot/AppData/Local/Pub/Cache/hosted/pub.dev/flutter_plugin_android_lifecycle-2.0.19",
+      "rootUri": "file:///C:/Users/Lamrot/AppData/Local/Pub/Cache/hosted/pub.dev/flutter_plugin_android_lifecycle-2.0.20",
       "packageUri": "lib/",
-      "languageVersion": "3.2"
+      "languageVersion": "3.4"
     },
     {
       "name": "flutter_riverpod",
@@ -221,7 +227,7 @@
       "name": "flutter_test",
       "rootUri": "file:///C:/Users/Lamrot/Desktop/mobile_practice/flutter/packages/flutter_test",
       "packageUri": "lib/",
-      "languageVersion": "3.2"
+      "languageVersion": "3.3"
     },
     {
       "name": "flutter_web_plugins",
@@ -266,6 +272,12 @@
       "languageVersion": "2.18"
     },
     {
+      "name": "hooks_riverpod",
+      "rootUri": "file:///C:/Users/Lamrot/AppData/Local/Pub/Cache/hosted/pub.dev/hooks_riverpod-1.0.4",
+      "packageUri": "lib/",
+      "languageVersion": "2.14"
+    },
+    {
       "name": "http",
       "rootUri": "file:///C:/Users/Lamrot/AppData/Local/Pub/Cache/hosted/pub.dev/http-0.13.6",
       "packageUri": "lib/",
@@ -291,9 +303,9 @@
     },
     {
       "name": "image_picker_android",
-      "rootUri": "file:///C:/Users/Lamrot/AppData/Local/Pub/Cache/hosted/pub.dev/image_picker_android-0.8.10",
+      "rootUri": "file:///C:/Users/Lamrot/AppData/Local/Pub/Cache/hosted/pub.dev/image_picker_android-0.8.12+3",
       "packageUri": "lib/",
-      "languageVersion": "3.3"
+      "languageVersion": "3.4"
     },
     {
       "name": "image_picker_for_web",
@@ -303,7 +315,7 @@
     },
     {
       "name": "image_picker_ios",
-      "rootUri": "file:///C:/Users/Lamrot/AppData/Local/Pub/Cache/hosted/pub.dev/image_picker_ios-0.8.10",
+      "rootUri": "file:///C:/Users/Lamrot/AppData/Local/Pub/Cache/hosted/pub.dev/image_picker_ios-0.8.12",
       "packageUri": "lib/",
       "languageVersion": "3.3"
     },
@@ -363,21 +375,21 @@
     },
     {
       "name": "leak_tracker",
-      "rootUri": "file:///C:/Users/Lamrot/AppData/Local/Pub/Cache/hosted/pub.dev/leak_tracker-10.0.0",
+      "rootUri": "file:///C:/Users/Lamrot/AppData/Local/Pub/Cache/hosted/pub.dev/leak_tracker-10.0.4",
       "packageUri": "lib/",
-      "languageVersion": "3.1"
+      "languageVersion": "3.2"
     },
     {
       "name": "leak_tracker_flutter_testing",
-      "rootUri": "file:///C:/Users/Lamrot/AppData/Local/Pub/Cache/hosted/pub.dev/leak_tracker_flutter_testing-2.0.1",
+      "rootUri": "file:///C:/Users/Lamrot/AppData/Local/Pub/Cache/hosted/pub.dev/leak_tracker_flutter_testing-3.0.3",
       "packageUri": "lib/",
-      "languageVersion": "3.1"
+      "languageVersion": "3.2"
     },
     {
       "name": "leak_tracker_testing",
-      "rootUri": "file:///C:/Users/Lamrot/AppData/Local/Pub/Cache/hosted/pub.dev/leak_tracker_testing-2.0.1",
+      "rootUri": "file:///C:/Users/Lamrot/AppData/Local/Pub/Cache/hosted/pub.dev/leak_tracker_testing-3.0.1",
       "packageUri": "lib/",
-      "languageVersion": "3.1"
+      "languageVersion": "3.2"
     },
     {
       "name": "lints",
@@ -411,7 +423,7 @@
     },
     {
       "name": "meta",
-      "rootUri": "file:///C:/Users/Lamrot/AppData/Local/Pub/Cache/hosted/pub.dev/meta-1.11.0",
+      "rootUri": "file:///C:/Users/Lamrot/AppData/Local/Pub/Cache/hosted/pub.dev/meta-1.12.0",
       "packageUri": "lib/",
       "languageVersion": "2.12"
     },
@@ -447,9 +459,9 @@
     },
     {
       "name": "path_provider_android",
-      "rootUri": "file:///C:/Users/Lamrot/AppData/Local/Pub/Cache/hosted/pub.dev/path_provider_android-2.2.4",
+      "rootUri": "file:///C:/Users/Lamrot/AppData/Local/Pub/Cache/hosted/pub.dev/path_provider_android-2.2.5",
       "packageUri": "lib/",
-      "languageVersion": "3.2"
+      "languageVersion": "3.4"
     },
     {
       "name": "path_provider_foundation",
@@ -525,9 +537,9 @@
     },
     {
       "name": "shared_preferences_android",
-      "rootUri": "file:///C:/Users/Lamrot/AppData/Local/Pub/Cache/hosted/pub.dev/shared_preferences_android-2.2.2",
+      "rootUri": "file:///C:/Users/Lamrot/AppData/Local/Pub/Cache/hosted/pub.dev/shared_preferences_android-2.2.3",
       "packageUri": "lib/",
-      "languageVersion": "3.2"
+      "languageVersion": "3.4"
     },
     {
       "name": "shared_preferences_foundation",
@@ -633,7 +645,7 @@
     },
     {
       "name": "test_api",
-      "rootUri": "file:///C:/Users/Lamrot/AppData/Local/Pub/Cache/hosted/pub.dev/test_api-0.6.1",
+      "rootUri": "file:///C:/Users/Lamrot/AppData/Local/Pub/Cache/hosted/pub.dev/test_api-0.7.0",
       "packageUri": "lib/",
       "languageVersion": "3.0"
     },
@@ -657,9 +669,9 @@
     },
     {
       "name": "vm_service",
-      "rootUri": "file:///C:/Users/Lamrot/AppData/Local/Pub/Cache/hosted/pub.dev/vm_service-13.0.0",
+      "rootUri": "file:///C:/Users/Lamrot/AppData/Local/Pub/Cache/hosted/pub.dev/vm_service-14.2.1",
       "packageUri": "lib/",
-      "languageVersion": "3.0"
+      "languageVersion": "3.3"
     },
     {
       "name": "watcher",
@@ -681,9 +693,9 @@
     },
     {
       "name": "win32",
-      "rootUri": "file:///C:/Users/Lamrot/AppData/Local/Pub/Cache/hosted/pub.dev/win32-5.5.0",
+      "rootUri": "file:///C:/Users/Lamrot/AppData/Local/Pub/Cache/hosted/pub.dev/win32-5.5.1",
       "packageUri": "lib/",
-      "languageVersion": "3.3"
+      "languageVersion": "3.4"
     },
     {
       "name": "xdg_directories",
@@ -704,7 +716,10 @@
       "languageVersion": "3.3"
     }
   ],
-  "generated": "2024-05-30T06:33:59.298672Z",
+  "generated": "2024-05-31T21:55:52.423081Z",
   "generator": "pub",
-  "generatorVersion": "3.3.4"
+  "generatorVersion": "3.4.1",
+  "flutterRoot": "file:///C:/Users/Lamrot/Desktop/mobile_practice/flutter",
+  "flutterVersion": "3.22.1",
+  "pubCache": "file:///C:/Users/Lamrot/AppData/Local/Pub/Cache"
 }

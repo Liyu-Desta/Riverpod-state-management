@@ -1,33 +1,33 @@
 import 'package:flutter/material.dart';
-import '../screens/Profile.dart'; // Import your ProfilePage file
-import 'adminDashboard.dart';
-import '../widgets/HamburgerMenu.dart'; 
-import '../widgets/logout_dialog.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:one/presentation/widgets/HamburgerMenu.dart';
+import 'package:one/presentation/widgets/logout_dialog.dart';
+import 'package:intl/intl.dart';
+import 'package:one/infrastructure/repositories/userList_repository_impl.dart';
+import 'package:one/Application/riverpod/userList_riverpod.dart';
+import 'package:one/Domain/Repositories/userList_repository.dart';
+import '../../Domain/models/userList_model.dart';
+import '../../Domain/models/userList_model.dart';
 
-void main() {
-  runApp(MaterialApp(
-    routes: {
-      '/': (context) => UserList(),
-      '/profile': (context) => AdminProfilePage(),
-      '/dashboard': (context) => Dashboard(),
-      '/userList': (context) => UserList(),
-    },
-  ));
-}
+final userListNotifierProvider =
+    StateNotifierProvider<UserListNotifier, AsyncValue<List<UserList>>>((ref) {
+  return UserListNotifier(userListRepository: UserListRepositoryImpl());
+});
+
 class UserList extends StatelessWidget {
-  final List<String> pages = ['Dashboard', 'User List', 'Profile'];
-  final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>(); // Add GlobalKey
+  final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      key: _scaffoldKey, // Assign GlobalKey to Scaffold
+      key: _scaffoldKey,
       appBar: AppBar(
         backgroundColor: Color.fromARGB(255, 166, 70, 183),
         leading: IconButton(
           icon: Icon(Icons.menu, color: Colors.white),
           onPressed: () {
-            _scaffoldKey.currentState!.openDrawer(); // Use GlobalKey to access ScaffoldState
+            _scaffoldKey.currentState!.openDrawer();
           },
         ),
         title: Row(
@@ -43,42 +43,84 @@ class UserList extends StatelessWidget {
         ),
       ),
       drawer: HamburgerMenu(
-        onDashboardTap: () {
-          Navigator.pushNamed(context, '/dashboard');
-        },
-        onUserListTap: () {
-          Navigator.pushNamed(context, '/userList');
-        },
-        onProfileTap: () {
-          Navigator.pushNamed(context, '/profile');
-        },
+        onUserListTap: () {},
+        onDashboardTap: () {},
+        onProfileTap: () {},
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
-        child: Column(
-          children: [
-            Text(
-              'Users List',
-              style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-            ),
-            SizedBox(height: 10),
-            Container(
-              decoration: BoxDecoration(
-                border: Border.all(color: Colors.black, width: 1.0),
-              ),
-              child: Row(
+        child: Consumer(builder: (context, watch, _) {
+          final userListState = watch(userListNotifierProvider);
+          return userListState.when(
+            loading: () => CircularProgressIndicator(),
+            error: (error, stackTrace) =>
+                Text('Failed to fetch user list: $error'),
+            data: (userList) => _buildUserList(userList, context),
+          );
+        }),
+      ),
+    );
+  }
+
+  Widget _buildUserList(List<UserList> userList, BuildContext context) {
+    return Column(
+      children: [
+        Text(
+          'Users List',
+          style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+        ),
+        SizedBox(height: 10),
+        Container(
+          child: Column(
+            children: [
+              Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  _buildTableCell('Name'),
                   _buildTableCell('Email'),
-                  _buildTableCell('Password'),
+                  _buildTableCell('phoneNumber'),
                   _buildTableCell('Change Role'),
                 ],
               ),
-            ),
-          ],
+              ListView.builder(
+                shrinkWrap: true,
+                itemCount: userList.length,
+                itemBuilder: (context, index) {
+                  final user = userList[index];
+                  return Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      _buildTableCell(user.email),
+                      _buildTableCell(user.phoneNumber),
+                      DropdownButton<String>(
+                        value: user.role,
+                        onChanged: (newValue) {
+                          if (newValue != user.role) {
+                            final updatedUser = user.copyWith(role: newValue);
+                            context.read(userListNotifierProvider.notifier).updateRole(
+                                  id: updatedUser.id!,
+                                  updatedUser: updatedUser,
+                                );
+                          }
+                        },
+                        items: const [
+                          DropdownMenuItem<String>(
+                            value: "user",
+                            child: Text("user"),
+                          ),
+                          DropdownMenuItem<String>(
+                            value: "admin",
+                            child: Text("admin"),
+                          ),
+                        ],
+                      ),
+                    ],
+                  );
+                },
+              ),
+            ],
+          ),
         ),
-      ),
+      ],
     );
   }
 

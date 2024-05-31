@@ -1,51 +1,33 @@
 import 'dart:typed_data';
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
-import '/presentation/screens/Profile.dart'; // Import your Profile file
-import 'userList.dart';
-import '/presentation/screens/LoginPage.dart';
-import '/presentation/widgets/HamburgerMenu.dart'; 
-import '../widgets/logout_dialog.dart';
 import 'package:intl/intl.dart';
+import '../../domain/models/opportunities.dart';
+import '../../Application/riverpod/adminDashboard_riverpod.dart'; 
+import '../../presentation/widgets/HamburgerMenu.dart';
+import '../widgets/logout_dialog.dart';
+import 'profile.dart';
+import '../../presentation/screens/userList.dart';
+import '../screens/loginPage.dart';
 
-
-// void main() {
-//   runApp(MaterialApp(
-//     debugShowCheckedModeBanner: false,
-//     home: Dashboard(),
-//     routes: {
-//       '/dashboard': (context) => Dashboard(),
-//       '/profile': (context) => AdminProfilePage(),
-//       '/userList': (context) => UserList(),
-//       '/loginpage': (context) => LoginScreen(),
-//     },
-//     onGenerateRoute: (settings) {
-//       if (settings.name == '/login') {
-//         return MaterialPageRoute(builder: (context) => LoginScreen());
-//       }
-//       // Handle other routes here if needed
-//     },
-//   ));
-// }
-
-class Dashboard extends StatefulWidget {
+class Dashboard extends ConsumerStatefulWidget {
   @override
   _DashboardState createState() => _DashboardState();
 }
 
-class _DashboardState extends State<Dashboard> {
+class _DashboardState extends ConsumerState<Dashboard> {
   late TextEditingController _titleController;
   late TextEditingController _descriptionController;
   late TextEditingController _locationController;
   DateTime? _date1;
   DateTime? _date2;
   Uint8List? _selectedImage;
-  List<Opportunity> opportunities = [];
 
   @override
   void initState() {
     super.initState();
+    ref.read(adminDashboardNotifierProvider.notifier).fetchOpportunities();
     _titleController = TextEditingController();
     _descriptionController = TextEditingController();
     _locationController = TextEditingController();
@@ -77,8 +59,7 @@ class _DashboardState extends State<Dashboard> {
                   ),
                   TextFormField(
                     controller: _descriptionController,
-                    decoration:
-                        InputDecoration(labelText: 'Description (Optional)'),
+                    decoration: InputDecoration(labelText: 'Description (Optional)'),
                   ),
                   TextFormField(
                     controller: _locationController,
@@ -149,9 +130,7 @@ class _DashboardState extends State<Dashboard> {
                       _locationController.text.isEmpty ||
                       _date1 == null) {
                     ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                          content:
-                              Text('Please fill in all mandatory fields!')),
+                      SnackBar(content: Text('Please fill in all mandatory fields!')),
                     );
                     return;
                   }
@@ -162,6 +141,7 @@ class _DashboardState extends State<Dashboard> {
                     return;
                   }
                   final newOpportunity = Opportunity(
+                    id: "",
                     title: _titleController.text,
                     description: _descriptionController.text,
                     location: _locationController.text,
@@ -169,9 +149,7 @@ class _DashboardState extends State<Dashboard> {
                     date2: _date2,
                     image: _selectedImage,
                   );
-                  setState(() {
-                    opportunities.add(newOpportunity);
-                  });
+                  ref.read(adminDashboardNotifierProvider.notifier).addOpportunity(newOpportunity);
                   Navigator.of(context).pop();
                 },
                 child: Text('Save'),
@@ -210,14 +188,13 @@ class _DashboardState extends State<Dashboard> {
     }
   }
 
-  void _editOpportunity(int index) {
-    Opportunity selectedOpportunity = opportunities[index];
+  void _editOpportunity(Opportunity selectedOpportunity) {
     _titleController.text = selectedOpportunity.title;
     _descriptionController.text = selectedOpportunity.description;
     _locationController.text = selectedOpportunity.location;
     _date1 = selectedOpportunity.date1;
     _date2 = selectedOpportunity.date2;
-    _selectedImage = selectedOpportunity.image;
+    _selectedImage = Uint8List.fromList(selectedOpportunity.image!);
 
     showDialog(
       context: context,
@@ -234,8 +211,7 @@ class _DashboardState extends State<Dashboard> {
                 ),
                 TextFormField(
                   controller: _descriptionController,
-                  decoration:
-                      InputDecoration(labelText: 'Description (Optional)'),
+                  decoration: InputDecoration(labelText: 'Description (Optional)'),
                 ),
                 TextFormField(
                   controller: _locationController,
@@ -297,8 +273,7 @@ class _DashboardState extends State<Dashboard> {
                     _locationController.text.isEmpty ||
                     _date1 == null) {
                   ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                        content: Text('Please fill in all mandatory fields!')),
+                    SnackBar(content: Text('Please fill in all mandatory fields!')),
                   );
                   return;
                 }
@@ -309,6 +284,7 @@ class _DashboardState extends State<Dashboard> {
                   return;
                 }
                 final updatedOpportunity = Opportunity(
+                  id: selectedOpportunity.id,
                   title: _titleController.text,
                   description: _descriptionController.text,
                   location: _locationController.text,
@@ -316,9 +292,7 @@ class _DashboardState extends State<Dashboard> {
                   date2: _date2,
                   image: _selectedImage,
                 );
-                setState(() {
-                  opportunities[index] = updatedOpportunity;
-                });
+                ref.read(adminDashboardNotifierProvider.notifier).updateOpportunity(selectedOpportunity.id, updatedOpportunity);
                 Navigator.of(context).pop();
               },
               child: Text('Update'),
@@ -329,7 +303,7 @@ class _DashboardState extends State<Dashboard> {
     );
   }
 
-  void _deleteOpportunity(int index) {
+  void _deleteOpportunity(Opportunity selectedOpportunity) {
     showDialog(
       context: context,
       builder: (context) {
@@ -345,9 +319,7 @@ class _DashboardState extends State<Dashboard> {
             ),
             ElevatedButton(
               onPressed: () {
-                setState(() {
-                  opportunities.removeAt(index);
-                });
+                ref.read(adminDashboardNotifierProvider.notifier).deleteOpportunity(selectedOpportunity.id);
                 Navigator.of(context).pop();
               },
               child: Text('Delete'),
@@ -358,10 +330,10 @@ class _DashboardState extends State<Dashboard> {
     );
   }
 
-  final List<String> pages = ['Dashboard', 'Users list', 'Profile'];
-
   @override
   Widget build(BuildContext context) {
+    final opportunitiesState = ref.watch(adminDashboardNotifierProvider);
+
     return Scaffold(
       appBar: AppBar(
         title: Text('Dashboard'),
@@ -369,31 +341,27 @@ class _DashboardState extends State<Dashboard> {
           IconButton(
             icon: Icon(Icons.logout),
             onPressed: () {
-             
-              GoRouter.of(context).pushReplacement('/login');
+              Navigator.pushReplacementNamed(context, '/login');
             },
           ),
         ],
       ),
-     
       drawer: HamburgerMenu(
-         onUserListTap: () { // Add navigation for User List
-          Navigator.pushNamed(context, '/userList');
+        onUserListTap: () {
+          // Add navigation for User List
+          // Navigator.pushNamed(context, '/userList');
         },
-  onDashboardTap: () {
-    // Define the action when the dashboard item is tapped
-    Navigator.pop(context); // Close the drawer if needed
-    Navigator.pushNamed(context, '/dashboard');
-  },
-  onProfileTap: () {
-    // Define the action when the profile item is tapped
-    Navigator.pop(context); // Close the drawer if needed
-    Navigator.pushNamed(context, '/profile');
-  },
-
-),
-
-
+        onDashboardTap: () {
+          // Define the action when the dashboard item is tapped
+          // Navigator.pop(context); 
+          // Navigator.pushNamed(context, '/dashboard');
+        },
+        onProfileTap: () {
+          // Define the action when the profile item is tapped
+          // Navigator.pop(context); 
+          // Navigator.pushNamed(context, '/profile');
+        },
+      ),
       body: Column(
         children: [
           Padding(
@@ -403,38 +371,49 @@ class _DashboardState extends State<Dashboard> {
               child: Text('Add Opportunity'),
             ),
           ),
-          Expanded(
-            child: ListView.builder(
-              itemCount: opportunities.length,
-              itemBuilder: (context, index) {
-                return Dismissible(
-                  key: Key(opportunities[index].title),
-                  direction: DismissDirection.endToStart,
-                  background: Container(
-                    alignment: Alignment.centerRight,
-                    padding: EdgeInsets.only(right: 20.0),
-                    color: Colors.red,
-                    child: Icon(Icons.delete, color: Colors.white),
-                  ),
-                  onDismissed: (direction) {
-                    _deleteOpportunity(index);
+          opportunitiesState.when(
+            data: (opportunities) {
+              return Expanded(
+                child: ListView.builder(
+                  itemCount: opportunities.length,
+                  itemBuilder: (context, index) {
+                    return Dismissible(
+                      key: Key(opportunities[index].title),
+                      direction: DismissDirection.endToStart,
+                      background: Container(
+                        alignment: Alignment.centerRight,
+                        padding: EdgeInsets.only(right: 20.0),
+                        color: Colors.red,
+                        child: Icon(Icons.delete, color: Colors.white),
+                      ),
+                      onDismissed: (direction) {
+                        _deleteOpportunity(opportunities[index]);
+                      },
+                      child: GestureDetector(
+                        onTap: () {
+                          _editOpportunity(opportunities[index]);
+                        },
+                        child: OpportunityCard(
+                          opportunity: opportunities[index],
+                          onEdit: () {
+                            _editOpportunity(opportunities[index]);
+                          },
+                          onDelete: () {
+                            _deleteOpportunity(opportunities[index]);
+                          },
+                        ),
+                      ),
+                    );
                   },
-                  child: GestureDetector(
-                    onTap: () {
-                      _editOpportunity(index);
-                    },
-                    child: OpportunityCard(
-                      opportunity: opportunities[index],
-                      onEdit: () {
-                        _editOpportunity(index);
-                      },
-                      onDelete: () {
-                        _deleteOpportunity(index);
-                      },
-                    ),
-                  ),
-                );
-              },
+                ),
+              );
+            },
+            loading: () => Center(child: CircularProgressIndicator()),
+            error: (error, stack) => Center(
+              child: Text(
+                'Failed to load data. Please try again.',
+                style: TextStyle(color: Colors.red),
+              ),
             ),
           ),
         ],
@@ -448,9 +427,7 @@ class OpportunityCard extends StatelessWidget {
   final VoidCallback? onEdit;
   final VoidCallback? onDelete;
 
-  const OpportunityCard(
-      {Key? key, required this.opportunity, this.onEdit, this.onDelete})
-      : super(key: key);
+  const OpportunityCard({Key? key, required this.opportunity, this.onEdit, this.onDelete}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -458,7 +435,7 @@ class OpportunityCard extends StatelessWidget {
       child: ListTile(
         leading: opportunity.image != null
             ? Image.memory(
-                opportunity.image!,
+                Uint8List.fromList(opportunity.image!),
                 width: 80,
                 fit: BoxFit.cover,
               )
@@ -502,22 +479,4 @@ class OpportunityCard extends StatelessWidget {
       ),
     );
   }
-}
-
-class Opportunity {
-  final String title;
-  final String description;
-  final String location;
-  final DateTime date1;
-  final DateTime? date2;
-  final Uint8List? image;
-
-  Opportunity({
-    required this.title,
-    required this.description,
-    required this.location,
-    required this.date1,
-    this.date2,
-    this.image,
-  });
 }
