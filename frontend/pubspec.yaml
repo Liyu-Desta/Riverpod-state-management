@@ -43,7 +43,15 @@ dependencies:
   go_router: ^7.1.0
   logger: ^2.3.0
   hooks_riverpod: 1.0.4
+<<<<<<< HEAD
 
+=======
+  riverpod: ^1.0.3
+  equatable: ^2.0.5
+  json_annotation: ^4.0.1
+  
+  
+>>>>>>> 94e5b171bbfebfda09772f5a28bcf20c63ae4b6e
 dev_dependencies:
   flutter_test:
     sdk: flutter

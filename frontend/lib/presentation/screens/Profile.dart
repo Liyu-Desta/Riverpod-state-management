@@ -1,41 +1,36 @@
 import 'dart:typed_data';
-
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
-import 'dart:io';
-import '../widgets/custom_app_bar.dart'; // Adjust the import path
-import '../widgets/custom_button.dart'; // Adjust the import path
-import '../widgets/custom_alert_dialog.dart'; // Adjust the import path
+import 'package:one/Domain/models/userProfile_model.dart';
+import 'package:one/Infrastructure/data_providers/userProfile_provider.dart';
+import '../widgets/custom_app_bar.dart';
+import '../widgets/custom_button.dart';
 
 void main() {
-  runApp(MaterialApp(
+  runApp(ProviderScope(child: MaterialApp(
     debugShowCheckedModeBanner: false,
-    home: AdminProfilePage(),
-  ));
+    home: UserProfilePage(),
+  )));
 }
 
-class AdminProfilePage extends StatefulWidget {
+class UserProfilePage extends ConsumerStatefulWidget {
   @override
-  _AdminProfilePageState createState() => _AdminProfilePageState();
+  _UserProfilePageState createState() => _UserProfilePageState();
 }
 
-class _AdminProfilePageState extends State<AdminProfilePage> {
-  String _adminName = 'Sebastian Goddard';
-  String _email = 'Sabastiangoddard12@gmail.com';
-  String _phoneNumber = '123-456-7890';
-  String _password = '';
-  Uint8List? _profileImageData;
-  bool _showSaveButton = false;
-
+class _UserProfilePageState extends ConsumerState<UserProfilePage> {
   final ScrollController _scrollController = ScrollController();
+  bool _showSaveButton = false;
 
   @override
   void initState() {
     super.initState();
-    _loadInitialImage();
+    ref.read(userProfileNotifierProvider.notifier).fetchUserProfile();
     _scrollController.addListener(_scrollListener);
   }
 
+<<<<<<< HEAD
   @override
   void dispose() {
     _scrollController.dispose();
@@ -134,9 +129,10 @@ class _AdminProfilePageState extends State<AdminProfilePage> {
     print('Admin information saved');
   }
 
+=======
+>>>>>>> 94e5b171bbfebfda09772f5a28bcf20c63ae4b6e
   void _scrollListener() {
-    if (_scrollController.offset >=
-        _scrollController.position.maxScrollExtent) {
+    if (_scrollController.offset >= _scrollController.position.maxScrollExtent) {
       setState(() {
         _showSaveButton = true;
       });
@@ -147,95 +143,174 @@ class _AdminProfilePageState extends State<AdminProfilePage> {
     }
   }
 
+  void _updateProfilePicture(Uint8List profileImageBytes) {
+    ref.read(userProfileNotifierProvider.notifier).updateProfilePicture(profileImageBytes);
+  }
+
+  void _updateField(String fieldName, String value) {
+    final notifier = ref.read(userProfileNotifierProvider.notifier);
+    switch (fieldName) {
+      case 'userName':
+        notifier.updateUserName(value);
+        break;
+      case 'email':
+        notifier.updateEmail(value);
+        break;
+      case 'phoneNumber':
+        notifier.updatePhoneNumber(value);
+        break;
+      case 'bio':
+        notifier.updateBio(value);
+        break;
+      case 'location':
+        notifier.updateLocation(value);
+        break;
+      case 'interests':
+        notifier.updateInterests(value);
+        break;
+      case 'socialMedia':
+        notifier.updateSocialMedia(value);
+        break;
+      default:
+        break;
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
+    final userProfileState = ref.watch(userProfileNotifierProvider);
+
     return Scaffold(
       appBar: CustomAppBar(
         title: 'Admin Profile',
       ),
-      body: CustomScrollView(
-        controller: _scrollController,
-        slivers: <Widget>[
-          SliverPadding(
-            padding: EdgeInsets.all(20),
-            sliver: SliverList(
-              delegate: SliverChildListDelegate(
-                [
-                  Center(
-                    child: GestureDetector(
-                      onTap: _updateProfilePicture,
-                      child: Container(
-                        height: 120,
-                        width: 120,
-                        decoration: BoxDecoration(
-                          color: Colors.grey[300],
-                          shape: BoxShape.circle,
-                        ),
-                        child: _profileImageData != null
-                            ? CircleAvatar(
-                                backgroundImage:
-                                    MemoryImage(_profileImageData!),
-                                radius: 60,
-                              )
-                            : Center(
-                                child: Icon(
-                                  Icons.camera_alt,
-                                  color: Colors.white,
-                                  size: 40,
-                                ),
-                              ),
-                      ),
-                    ),
-                  ),
-                  SizedBox(height: 60),
-                  _buildProfileField(
-                    labelText: 'Admin Name',
-                    initialValue: _adminName,
-                    onChanged: (value) {
-                      setState(() {
-                        _adminName = value;
-                      });
-                    },
-                  ),
-                  SizedBox(height: 16.0),
-                  _buildProfileField(
-                    labelText: 'Email',
-                    initialValue: _email,
-                    onChanged: (value) {
-                      setState(() {
-                        _email = value;
-                      });
-                    },
-                  ),
-                  SizedBox(height: 16.0),
-                  _buildProfileField(
-                    labelText: 'Phone Number',
-                    initialValue: _phoneNumber,
-                    onChanged: (value) {
-                      setState(() {
-                        _phoneNumber = value;
-                      });
-                    },
-                  ),
-                  SizedBox(height: 20),
-                  Divider(color: Colors.grey),
-                  SizedBox(height: 10),
-                  _buildAdditionalFeatures(),
-                  SizedBox(height: 20),
-                ],
-              ),
-            ),
-          ),
-        ],
-      ),
+      body: userProfileState.isLoading
+          ? Center(child: CircularProgressIndicator())
+          : userProfileState.userProfile == null
+              ? Center(child: Text('Failed to load profile: ${userProfileState.errorMessage}'))
+              : _buildProfileContent(userProfileState.userProfile!),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
       floatingActionButton: Visibility(
         visible: _showSaveButton,
         child: CustomButton(
           text: 'Save',
-          onPressed: _saveAdminInformation,
+          onPressed: () {
+            _saveUserProfile();
+          },
         ),
       ),
+    );
+  }
+
+  Widget _buildProfileContent(UserProfile userProfile) {
+    return CustomScrollView(
+      controller: _scrollController,
+      slivers: [
+        SliverPadding(
+          padding: EdgeInsets.all(40),
+          sliver: SliverList(
+            delegate: SliverChildListDelegate(
+              [
+                GestureDetector(
+                  onTap: () async {
+                    final picker = ImagePicker();
+                    final pickedFile = await picker.pickImage(source: ImageSource.gallery);
+                    if (pickedFile != null) {
+                      final bytes = await pickedFile.readAsBytes();
+                      _updateProfilePicture(bytes);
+                    }
+                  },
+                  child: Container(
+                    height: 120,
+                    width: 120,
+                    decoration: BoxDecoration(
+                      color: Colors.grey[300],
+                      shape: BoxShape.circle,
+                    ),
+                    child: userProfile.profileImageBytes != null
+                        ? CircleAvatar(
+                            backgroundImage: MemoryImage(userProfile.profileImageBytes!),
+                            radius: 60,
+                          )
+                        : Center(
+                            child: Icon(
+                              Icons.camera_alt,
+                              color: Colors.white,
+                              size: 40,
+                            ),
+                          ),
+                  ),
+                ),
+                SizedBox(height: 20),
+                _buildProfileField(
+                  labelText: 'Admin Name',
+                  initialValue: userProfile.userName,
+                  onChanged: (value) => _updateField('userName', value),
+                ),
+                SizedBox(height: 16.0),
+                _buildProfileField(
+                  labelText: 'Email',
+                  initialValue: userProfile.email,
+                  onChanged: (value) => _updateField('email', value),
+                ),
+                SizedBox(height: 16.0),
+                _buildProfileField(
+                  labelText: 'Phone Number',
+                  initialValue: userProfile.phoneNumber,
+                  onChanged: (value) => _updateField('phoneNumber', value),
+                ),
+                SizedBox(height: 20),
+                Divider(color: Colors.grey),
+                _buildAdditionalProfileFeature(
+                  icon: Icons.person,
+                  title: 'Bio',
+                  subtitle: 'Add a short description about yourself',
+                  inputValue: userProfile.bio,
+                  onTap: (value) {
+                    _showInputDialog(userProfile.bio, (value) {
+                      _updateField('bio', value);
+                    });
+                  },
+                ),
+                _buildAdditionalProfileFeature(
+                  icon: Icons.location_on,
+                  title: 'Location',
+                  subtitle: 'Add or update your current location',
+                  inputValue: userProfile.location,
+                  onTap: (value) {
+                    _showInputDialog(userProfile.location, (value) {
+                      _updateField('location', value);
+                    });
+                  },
+                ),
+                _buildAdditionalProfileFeature(
+                  icon: Icons.tag,
+                  title: 'Interests',
+                  subtitle: 'Add or update your interests or hobbies',
+                  inputValue: userProfile.interests,
+                  onTap: (value) {
+                    _showInputDialog(userProfile.interests, (value) {
+                      _updateField('interests', value);
+                    });
+                  },
+                ),
+                _buildAdditionalProfileFeature(
+                  icon: Icons.link,
+                  title: 'Social Media',
+                  subtitle: 'Connect your social media profiles',
+                  inputValue: userProfile.socialMedia,
+                  onTap: (value) {
+                    _showInputDialog(userProfile.socialMedia, (value) {
+                      _updateField('socialMedia', value);
+                    });
+                  },
+                ),
+                SizedBox(height: 20),
+              ],
+            ),
+          ),
+        ),
+      ],
     );
   }
 
@@ -261,40 +336,12 @@ class _AdminProfilePageState extends State<AdminProfilePage> {
     );
   }
 
-  Widget _buildAdditionalFeatures() {
-    return Column(
-      children: [
-        _buildAdditionalFeature(
-          icon: Icons.security,
-          title: 'Security Settings',
-          subtitle: 'Manage security preferences',
-          onTap: () {
-            // Implement security settings functionality
-          },
-        ),
-        _buildAdditionalFeature(
-          icon: Icons.settings,
-          title: 'App Settings',
-          subtitle: 'Customize app preferences',
-          onTap: () {
-            // Implement app settings functionality
-          },
-        ),
-        _buildAdditionalFeature(
-          icon: Icons.vpn_key,
-          title: 'Change Password',
-          subtitle: 'Change your login password',
-          onTap: _changePassword,
-        ),
-      ],
-    );
-  }
-
-  Widget _buildAdditionalFeature({
+  Widget _buildAdditionalProfileFeature({
     required IconData icon,
     required String title,
     required String subtitle,
-    required VoidCallback onTap,
+    required String inputValue,
+    required ValueChanged<String> onTap,
   }) {
     return Column(
       children: [
@@ -315,10 +362,71 @@ class _AdminProfilePageState extends State<AdminProfilePage> {
               fontFamily: 'Roboto',
             ),
           ),
-          onTap: onTap,
+          onTap: () {
+            onTap(inputValue);
+          },
         ),
+        if (inputValue.isNotEmpty)
+          Container(
+            padding: EdgeInsets.symmetric(horizontal: 16),
+            alignment: Alignment.centerLeft,
+            child: Text(
+              inputValue,
+              style: TextStyle(
+                color: Colors.black,
+                fontFamily: 'Roboto',
+              ),
+            ),
+          ),
         Divider(color: Colors.grey),
       ],
     );
+  }
+
+  void _showInputDialog(String initialValue, Function(String) onSave) {
+    String inputValue = initialValue;
+
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Enter'),
+          content: TextFormField(
+            initialValue: initialValue,
+            onChanged: (value) => inputValue = value,
+            decoration: InputDecoration(
+              hintText: 'Enter',
+            ),
+          ),
+          actions: [
+            ElevatedButton(
+              onPressed: () {
+                Navigator.pop(context);
+              },
+              child: Text('Cancel'),
+            ),
+            ElevatedButton(
+              onPressed: () {
+                onSave(inputValue);
+                Navigator.pop(context);
+              },
+              child: Text('Ok'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  void _saveUserProfile() {
+    final notifier = ref.read(userProfileNotifierProvider.notifier);
+    final userProfile = ref.read(userProfileNotifierProvider).userProfile!;
+    notifier.updateUserName(userProfile.userName);
+    notifier.updateEmail(userProfile.email);
+    notifier.updatePhoneNumber(userProfile.phoneNumber);
+    notifier.updateBio(userProfile.bio);
+    notifier.updateLocation(userProfile.location);
+    notifier.updateInterests(userProfile.interests);
+    notifier.updateSocialMedia(userProfile.socialMedia);
   }
 }
