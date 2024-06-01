@@ -1,15 +1,16 @@
 import 'package:flutter/material.dart';
 import '../widgets/logout_dialog.dart';
+import 'package:go_router/go_router.dart';
 
 class HamburgerMenu extends StatelessWidget {
   final VoidCallback onDashboardTap;
-  final VoidCallback onUserListTap; // Add callback for UserList
+  final VoidCallback onUserListTap;
   final VoidCallback onProfileTap;
 
   const HamburgerMenu({
     Key? key,
     required this.onDashboardTap,
-    required this.onUserListTap, // Update constructor
+    required this.onUserListTap,
     required this.onProfileTap,
   }) : super(key: key);
 
@@ -30,7 +31,7 @@ class HamburgerMenu extends StatelessWidget {
               ),
             ),
             accountEmail: Text(
-              '', // Replace with the actual email address or placeholder text
+              'example@email.com', // Replace with the actual email address
               style: TextStyle(
                 color: Colors.white,
               ),
@@ -49,31 +50,30 @@ class HamburgerMenu extends StatelessWidget {
             onTap: onDashboardTap,
           ),
           ListTile(
-            title: Text('User List'), // Add User List option
+            title: Text('User List'),
             onTap: onUserListTap,
           ),
           ListTile(
             title: Text('Profile'),
             onTap: onProfileTap,
           ),
-           ListTile(
-              title: Text('Logout'),
-              onTap: () {
-                _showLogoutConfirmationDialog(context);
-              },
-            ),
+          ListTile(
+            title: Text('Logout'),
+            onTap: () {
+              _showLogoutConfirmationDialog(context);
+            },
+          ),
         ],
       ),
     );
   }
-  
-void _showLogoutConfirmationDialog(BuildContext context) {
-  showDialog(
-    context: context,
-    builder: (BuildContext context) {
-      return LogoutDialog(); // Display the LogoutDialog
-    },
-  );
-}
 
+  void _showLogoutConfirmationDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return LogoutDialog();
+      },
+    );
+  }
 }

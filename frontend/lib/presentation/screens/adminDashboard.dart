@@ -1,10 +1,11 @@
 import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
 import '../../domain/models/opportunities.dart';
-import '../../Application/riverpod/adminDashboard_riverpod.dart'; 
+import '../../Application/riverpod/adminDashboard_riverpod.dart';
 import '../../presentation/widgets/HamburgerMenu.dart';
 import '../widgets/logout_dialog.dart';
 import 'profile.dart';
@@ -59,7 +60,8 @@ class _DashboardState extends ConsumerState<Dashboard> {
                   ),
                   TextFormField(
                     controller: _descriptionController,
-                    decoration: InputDecoration(labelText: 'Description (Optional)'),
+                    decoration:
+                        InputDecoration(labelText: 'Description (Optional)'),
                   ),
                   TextFormField(
                     controller: _locationController,
@@ -130,7 +132,9 @@ class _DashboardState extends ConsumerState<Dashboard> {
                       _locationController.text.isEmpty ||
                       _date1 == null) {
                     ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(content: Text('Please fill in all mandatory fields!')),
+                      SnackBar(
+                          content:
+                              Text('Please fill in all mandatory fields!')),
                     );
                     return;
                   }
@@ -149,7 +153,9 @@ class _DashboardState extends ConsumerState<Dashboard> {
                     date2: _date2,
                     image: _selectedImage,
                   );
-                  ref.read(adminDashboardNotifierProvider.notifier).addOpportunity(newOpportunity);
+                  ref
+                      .read(adminDashboardNotifierProvider.notifier)
+                      .addOpportunity(newOpportunity);
                   Navigator.of(context).pop();
                 },
                 child: Text('Save'),
@@ -211,7 +217,8 @@ class _DashboardState extends ConsumerState<Dashboard> {
                 ),
                 TextFormField(
                   controller: _descriptionController,
-                  decoration: InputDecoration(labelText: 'Description (Optional)'),
+                  decoration:
+                      InputDecoration(labelText: 'Description (Optional)'),
                 ),
                 TextFormField(
                   controller: _locationController,
@@ -273,7 +280,8 @@ class _DashboardState extends ConsumerState<Dashboard> {
                     _locationController.text.isEmpty ||
                     _date1 == null) {
                   ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text('Please fill in all mandatory fields!')),
+                    SnackBar(
+                        content: Text('Please fill in all mandatory fields!')),
                   );
                   return;
                 }
@@ -292,7 +300,10 @@ class _DashboardState extends ConsumerState<Dashboard> {
                   date2: _date2,
                   image: _selectedImage,
                 );
-                ref.read(adminDashboardNotifierProvider.notifier).updateOpportunity(selectedOpportunity.id, updatedOpportunity);
+                ref
+                    .read(adminDashboardNotifierProvider.notifier)
+                    .updateOpportunity(
+                        selectedOpportunity.id, updatedOpportunity);
                 Navigator.of(context).pop();
               },
               child: Text('Update'),
@@ -319,7 +330,9 @@ class _DashboardState extends ConsumerState<Dashboard> {
             ),
             ElevatedButton(
               onPressed: () {
-                ref.read(adminDashboardNotifierProvider.notifier).deleteOpportunity(selectedOpportunity.id);
+                ref
+                    .read(adminDashboardNotifierProvider.notifier)
+                    .deleteOpportunity(selectedOpportunity.id);
                 Navigator.of(context).pop();
               },
               child: Text('Delete'),
@@ -348,18 +361,16 @@ class _DashboardState extends ConsumerState<Dashboard> {
       ),
       drawer: HamburgerMenu(
         onUserListTap: () {
-          // Add navigation for User List
-          // Navigator.pushNamed(context, '/userList');
+          // print("USERLIST ROUTING");
+          context.go('/userList');
         },
         onDashboardTap: () {
-          // Define the action when the dashboard item is tapped
-          // Navigator.pop(context); 
-          // Navigator.pushNamed(context, '/dashboard');
+          // print("DASHBOARD ROUTING");
+          context.go('/dashboard');
         },
         onProfileTap: () {
-          // Define the action when the profile item is tapped
-          // Navigator.pop(context); 
-          // Navigator.pushNamed(context, '/profile');
+          // print("PROFILE ROUTING");
+          context.go('/profile');
         },
       ),
       body: Column(
@@ -427,7 +438,9 @@ class OpportunityCard extends StatelessWidget {
   final VoidCallback? onEdit;
   final VoidCallback? onDelete;
 
-  const OpportunityCard({Key? key, required this.opportunity, this.onEdit, this.onDelete}) : super(key: key);
+  const OpportunityCard(
+      {Key? key, required this.opportunity, this.onEdit, this.onDelete})
+      : super(key: key);
 
   @override
   Widget build(BuildContext context) {

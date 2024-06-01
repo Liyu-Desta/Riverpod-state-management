@@ -2,7 +2,6 @@ import 'package:http/http.dart' as http;
 import 'package:one/Domain/models/userList_model.dart';
 import 'package:one/Infrastructure/data_providers/auth_api_service.dart';
 import 'package:one/Infrastructure/repositories/user_repository_impl.dart';
-
 import 'dart:convert';
 
 class userListApi {
@@ -10,8 +9,8 @@ class userListApi {
 
   static Future<void> updateRole(String id, userList updatedRole) async {
     var userRepository = UserRepositoryImpl(apiService: AuthApiService());
-    print("userRepository $userRepository");
     var token = await userRepository.getCurrentUser();
+
     final response = await http.put(
       Uri.parse('$baseUrl/users/$id'),
       headers: <String, String>{
@@ -20,11 +19,9 @@ class userListApi {
       },
       body: jsonEncode(updatedRole.toJson()),
     );
-    print("put response body ${response.body}");
-    print(
-        "jsonEncode(updatedRole.toJson()) ${jsonEncode(updatedRole.toJson())}");
 
-    if (response.statusCode != 200) {
+    if (response.statusCode == 200) {
+    } else {
       throw Exception('Failed to update role');
     }
   }
@@ -32,11 +29,11 @@ class userListApi {
   static Future<List<userList>> fetchUserList() async {
     var userRepository = UserRepositoryImpl(apiService: AuthApiService());
     var token = await userRepository.getCurrentUser();
+
     final response = await http.get(Uri.parse('$baseUrl/users/All'),
         headers: {"Authorization": "Bearer ${token!}"});
 
     if (response.statusCode == 200) {
-      print("response.body ${response.body}");
       List<dynamic> data = jsonDecode(response.body);
       return data.map((json) => userList.fromJson(json)).toList();
     } else {

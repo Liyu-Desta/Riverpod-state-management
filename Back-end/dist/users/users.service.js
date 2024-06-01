@@ -35,7 +35,7 @@ let UsersService = class UsersService {
         return this.userModel.findById(id).exec();
     }
     async updateUser(id, updateData) {
-        return this.userModel.findByIdAndUpdate(id, updateData, { new: true }).exec();
+        return await this.userModel.findByIdAndUpdate(id, updateData, { new: true }).exec();
     }
     async deleteUser(id) {
         return this.userModel.findByIdAndDelete(id).exec();

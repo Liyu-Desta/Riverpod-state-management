@@ -1,25 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:one/presentation/widgets/HamburgerMenu.dart';
-import 'package:one/presentation/widgets/logout_dialog.dart';
-import 'package:intl/intl.dart';
-import 'package:one/infrastructure/repositories/userList_repository_impl.dart';
 import 'package:one/Application/riverpod/userList_riverpod.dart';
-import 'package:one/Domain/Repositories/userList_repository.dart';
-import '../../Domain/models/userList_model.dart';
-import '../../Domain/models/userList_model.dart';
+import 'package:one/Domain/models/userList_model.dart';
 
-final userListNotifierProvider =
-    StateNotifierProvider<UserListNotifier, AsyncValue<List<UserList>>>((ref) {
-  return UserListNotifier(userListRepository: UserListRepositoryImpl());
-});
-
-class UserList extends StatelessWidget {
+class UserList extends ConsumerWidget {
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final userListState = ref.watch(userListNotifierProvider);
+
     return Scaffold(
       key: _scaffoldKey,
       appBar: AppBar(
@@ -43,26 +35,31 @@ class UserList extends StatelessWidget {
         ),
       ),
       drawer: HamburgerMenu(
-        onUserListTap: () {},
-        onDashboardTap: () {},
-        onProfileTap: () {},
+        onUserListTap: () {
+          // print("USERLIST ROUTING");
+          context.go('/userList');
+        },
+        onDashboardTap: () {
+          // print("DASHBOARD ROUTING");
+          context.go('/dashboard');
+        },
+        onProfileTap: () {
+          // print("PROFILE ROUTING");
+          context.go('/profile');
+        },
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
-        child: Consumer(builder: (context, watch, _) {
-          final userListState = watch(userListNotifierProvider);
-          return userListState.when(
-            loading: () => CircularProgressIndicator(),
-            error: (error, stackTrace) =>
-                Text('Failed to fetch user list: $error'),
-            data: (userList) => _buildUserList(userList, context),
-          );
-        }),
+        child: userListState.when(
+          loading: () => Center(child: CircularProgressIndicator()),
+          error: (error, stackTrace) => Text('Failed to fetch user list: $error'),
+          data: (userList) => _buildUserList(userList ?? [], ref),
+        ),
       ),
     );
   }
 
-  Widget _buildUserList(List<UserList> userList, BuildContext context) {
+  Widget _buildUserList(List<userList> userList, WidgetRef ref) {
     return Column(
       children: [
         Text(
@@ -77,7 +74,7 @@ class UserList extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   _buildTableCell('Email'),
-                  _buildTableCell('phoneNumber'),
+                  _buildTableCell('Phone Number'),
                   _buildTableCell('Change Role'),
                 ],
               ),
@@ -89,17 +86,14 @@ class UserList extends StatelessWidget {
                   return Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      _buildTableCell(user.email),
-                      _buildTableCell(user.phoneNumber),
+                      _buildTableCell(user.email ?? ''),
+                      _buildTableCell(user.phoneNumber ?? ''),
                       DropdownButton<String>(
-                        value: user.role,
+                        value: user.role ?? '',
                         onChanged: (newValue) {
-                          if (newValue != user.role) {
+                          if (newValue != null && newValue != user.role) {
                             final updatedUser = user.copyWith(role: newValue);
-                            context.read(userListNotifierProvider.notifier).updateRole(
-                                  id: updatedUser.id!,
-                                  updatedUser: updatedUser,
-                                );
+                            ref.read(userListNotifierProvider.notifier).updateRole(updatedUser);
                           }
                         },
                         items: const [

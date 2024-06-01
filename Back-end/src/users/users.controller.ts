@@ -43,6 +43,11 @@ export class UsersController {
   @Put(':id')
   @HasRoles(Role.Admin)
   async updateUser(@Param('id') id: string, @Body() userData) {
+    if(userData.role == "user"){
+      userData.roles = [Role.User]
+    } else if(userData.role == "admin") {
+      userData.roles = [Role.Admin]
+    }
     return this.usersService.updateUser(id, userData);
   }
 
@@ -52,13 +57,13 @@ export class UsersController {
     return this.usersService.deleteUser(id);
   }
 
-  @Put(':id/role')
+  @Put('roles/:id')
   @HasRoles(Role.Admin)
   async updateRole(@Param('id') id: string, @Body() role: string) {
     return this.usersService.updateRole(id, role);
   }
 
-  @Get(':id/role')
+  @Get('roles/:id')
   @HasRoles(Role.Admin)
   async getUserRole(@Param('id') id: string) {
     return this.usersService.getUserRole(id);

@@ -9,7 +9,6 @@ exports.BookingSchema = new mongoose_1.Schema({
         ref: 'VolunteerOpportunity',
         required: true,
     },
-    date: { type: String },
     // Additional fields as necessary
 });
 // Create the model and export it

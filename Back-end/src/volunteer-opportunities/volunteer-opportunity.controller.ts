@@ -52,7 +52,7 @@ export class VolunteerOpportunitiesController {
   }
   //volunteers(users) booking
 
-  @Post(':bookingid')
+  @Post(':id/book')
   @UseGuards(JwtAuthGuard) // Open to all authenticated users
   async bookOpportunity(@Req() req, @Param('id') opportunityId: string) {
     const userId = req.user.userId; // Accessing "userId" from req.user
@@ -76,11 +76,4 @@ export class VolunteerOpportunitiesController {
   async getOpportunityBookings(@Param('id') opportunityId: string) {
     return this.opportunitiesService.getOpportunityBookings(opportunityId);
   }
-
-  @Put('bookings/:bookingId')
-  
-  async updateBooking(@Param('id') id: string, @Body() bookingData) {
-    return this.opportunitiesService.updateBooking(id, bookingData);
-  }
-
 }

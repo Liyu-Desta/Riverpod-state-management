@@ -33,6 +33,12 @@ let UsersController = class UsersController {
         return this.usersService.createUser(userData);
     }
     async updateUser(id, userData) {
+        if (userData.role == "user") {
+            userData.roles = [role_enum_1.Role.User];
+        }
+        else if (userData.role == "admin") {
+            userData.roles = [role_enum_1.Role.Admin];
+        }
         return this.usersService.updateUser(id, userData);
     }
     async deleteUser(id) {
@@ -86,7 +92,7 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], UsersController.prototype, "deleteUser", null);
 __decorate([
-    (0, common_1.Put)(':id/role'),
+    (0, common_1.Put)('roles/:id'),
     (0, has_roles_decorator_1.HasRoles)(role_enum_1.Role.Admin),
     __param(0, (0, common_1.Param)('id')),
     __param(1, (0, common_1.Body)()),
@@ -95,7 +101,7 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], UsersController.prototype, "updateRole", null);
 __decorate([
-    (0, common_1.Get)(':id/role'),
+    (0, common_1.Get)('roles/:id'),
     (0, has_roles_decorator_1.HasRoles)(role_enum_1.Role.Admin),
     __param(0, (0, common_1.Param)('id')),
     __metadata("design:type", Function),

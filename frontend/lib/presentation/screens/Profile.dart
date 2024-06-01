@@ -110,6 +110,7 @@ class _AdminProfilePageState extends State<AdminProfilePage> {
           actions: [
             TextButton(
               onPressed: () {
+                print("pop");
                 Navigator.of(context).pop();
               },
               child: Text('Cancel'),

@@ -1,6 +1,8 @@
-import '../../Domain/models/userList_model.dart';
+// userList_repository.dart
 
-abstract class userListRepository {
-  Future<void> updateRole(userList userList);
+import 'package:one/Domain/models/userList_model.dart';
+
+abstract class UserListRepository {
   Future<List<userList>> fetchUserList();
+  Future<void> updateRole(userList updatedUser);
 }

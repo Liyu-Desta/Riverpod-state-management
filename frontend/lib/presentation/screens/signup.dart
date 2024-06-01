@@ -26,7 +26,7 @@ class SignupScreen extends ConsumerWidget {
       if (state.user!.role == "admin") {
         return Dashboard();
       } else {
-        return MenuApp();
+        return Menu();
       }
     } else if (state.status == AuthStatus.error) {
       return Scaffold(body: Center(child: Text(state.error!)));

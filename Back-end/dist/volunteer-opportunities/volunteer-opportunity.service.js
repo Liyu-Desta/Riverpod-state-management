@@ -67,11 +67,6 @@ let VolunteerOpportunitiesService = class VolunteerOpportunitiesService {
             .populate('user')
             .exec();
     }
-    async updateBooking(bookingId, bookingData) {
-        return this.bookingModel
-            .findByIdAndUpdate(bookingId, bookingData, { new: true })
-            .exec();
-    }
 };
 VolunteerOpportunitiesService = __decorate([
     (0, common_1.Injectable)(),

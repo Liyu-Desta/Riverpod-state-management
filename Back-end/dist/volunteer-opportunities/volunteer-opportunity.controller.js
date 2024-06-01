@@ -52,9 +52,6 @@ let VolunteerOpportunitiesController = class VolunteerOpportunitiesController {
     async getOpportunityBookings(opportunityId) {
         return this.opportunitiesService.getOpportunityBookings(opportunityId);
     }
-    async updateBooking(id, bookingData) {
-        return this.opportunitiesService.updateBooking(id, bookingData);
-    }
 };
 __decorate([
     (0, common_1.Post)(),
@@ -125,14 +122,6 @@ __decorate([
     __metadata("design:paramtypes", [String]),
     __metadata("design:returntype", Promise)
 ], VolunteerOpportunitiesController.prototype, "getOpportunityBookings", null);
-__decorate([
-    (0, common_1.Put)('bookings/:bookingId'),
-    __param(0, (0, common_1.Param)('id')),
-    __param(1, (0, common_1.Body)()),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String, Object]),
-    __metadata("design:returntype", Promise)
-], VolunteerOpportunitiesController.prototype, "updateBooking", null);
 VolunteerOpportunitiesController = __decorate([
     (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard, roles_guard_1.RolesGuard),
     (0, common_1.Controller)('volunteer-opportunities'),

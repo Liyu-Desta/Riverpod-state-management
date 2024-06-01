@@ -6,6 +6,7 @@ import 'package:one/presentation/screens/adminDashboard.dart';
 import 'package:one/presentation/screens/menu.dart';
 import 'package:one/presentation/screens/signup.dart';
 import 'package:one/presentation/screens/userDashboard.dart';
+import 'package:one/presentation/screens/userList.dart';
 
 class LoginScreen extends ConsumerWidget {
   LoginScreen({Key? key}) : super(key: key);
@@ -24,7 +25,7 @@ class LoginScreen extends ConsumerWidget {
       if (authState.user!.role == "admin") {
         return Dashboard();
       } else {
-        return MenuApp();
+        return Menu();
       }
     } else if (authState.status == AuthStatus.error) {
       return Scaffold(body: Center(child: Text(authState.error!)));

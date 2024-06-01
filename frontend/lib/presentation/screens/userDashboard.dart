@@ -1,215 +1,107 @@
+// user_dashboard.dart
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:one/Domain/models/userDashboard_model.dart';
+import 'package:one/Application/riverpod/userDashboard_riverpod.dart';
 
-// void main() {
-//   runApp(DashboardApp());
-// }
-
-// class DashboardApp extends StatelessWidget {
-//   @override
-//   Widget build(BuildContext context) {
-//     return MaterialApp(
-//       home: Dashboard(),
-//     );
-//   }
-// }
-
-class UserDashboard extends StatefulWidget {
+class UserDashboard extends ConsumerWidget {
   @override
-  _DashboardState createState() => _DashboardState();
-}
+  Widget build(BuildContext context, WidgetRef ref) { // Correct the parameter to WidgetRef
+    final userOpportunitiesState = ref.watch(userDashboardNotifierProvider);
 
-class _DashboardState extends State<UserDashboard> {
-  List<Opportunity> bookedOpportunities = [
-    Opportunity(
-      title: 'Volunteers',
-      description: 'Description of the volunteers',
-      imagePath: 'assets/cartoon.jpeg',
-      dates: ['April 05, 2024 morning', 'April 10, 2024 afternoon'],
-      selectedDateIndex: 0,
-      showDetails: false,
-    ),
-    // Add more booked opportunities here
-  ];
-
-  @override
-  Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: Color.fromARGB(255, 166, 70, 183),
-        title: Center(
-        child: const Text('User Dashboard'),
-    ),
+        title: Text('User Dashboard'),
       ),
-      body: ListView.builder(
-        itemCount: bookedOpportunities.length,
-        itemBuilder: (context, index) {
-          return Column(
-            children: [
-              ListTile(
-                onTap: () {
-                  setState(() {
-                    bookedOpportunities[index].showDetails =
-                        !bookedOpportunities[index].showDetails;
-                  });
-                },
-                leading: Image.asset(
-                  bookedOpportunities[index].imagePath,
-                  fit: BoxFit.cover,
-                  width: 100.0,
-                  height: 100.0,
-                ),
-                title: Text(bookedOpportunities[index].title),
-                trailing: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    IconButton(
-                      icon: Icon(Icons.edit),
-                      onPressed: () {
-                        _showOpportunityDetails(context, bookedOpportunities[index]);
-                      },
-                    ),
-                    IconButton(
-                      icon: Icon(Icons.delete),
-                      onPressed: () {
-                        setState(() {
-                          bookedOpportunities.removeAt(index);
-                        });
-                      },
-                    ),
-                  ],
-                ),
-              ),
-              if (bookedOpportunities[index].showDetails)
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        bookedOpportunities[index].title,
-                        style: TextStyle(fontWeight: FontWeight.bold),
-                      ),
-                      SizedBox(height: 8.0),
-                      Text(bookedOpportunities[index].description),
-                      SizedBox(height: 8.0),
-                      DropdownButtonFormField<String>(
-                        value: bookedOpportunities[index].dates[bookedOpportunities[index].selectedDateIndex],
-                        items: bookedOpportunities[index].dates.map((date) {
-                          return DropdownMenuItem<String>(
-                            value: date,
-                            child: Text(date),
-                          );
-                        }).toList(),
-                        onChanged: (String? newDate) {
-                          setState(() {
-                            if (newDate != null) {
-                              bookedOpportunities[index].selectedDateIndex =
-                                  bookedOpportunities[index].dates.indexOf(newDate);
-                            }
-                          });
-                        },
-                      ),
-                      SizedBox(height: 8.0),
-                      ElevatedButton(
-                        onPressed: () {
-                          _updateOpportunity(bookedOpportunities[index]);
-                          setState(() {bookedOpportunities[index].showDetails = false; // Hide description after update
-                          });
-                        },
-                        child: Text('Update'),
-                      ),
-                    ],
-                  ),
-                ),
-            ],
+      body: userOpportunitiesState.when(
+        loading: () => Center(child: CircularProgressIndicator()),
+        error: (error, stackTrace) => Center(child: Text('Error: $error')),
+        data: (userOpportunities) {
+          return ListView.builder(
+            itemCount: userOpportunities.length,
+            itemBuilder: (context, index) {
+              final opportunity = userOpportunities[index];
+              return OpportunityCard(opportunity: opportunity);
+            },
           );
         },
       ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          // Navigate to the screen for adding new opportunities
+          Navigator.of(context).pushNamed('/addOpportunity');
+        },
+        child: Icon(Icons.add),
+      ),
     );
-  }
-
-  void _showOpportunityDetails(BuildContext context, Opportunity opportunity) {
-    showDialog(
-      context: context,
-      builder: (BuildContext dialogContext) {
-        return StatefulBuilder(
-          builder: (context, setState) {
-            return AlertDialog(
-              title: Text('Volunteer Opportunity'),
-              content: SingleChildScrollView(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Text(opportunity.title, style: TextStyle(fontWeight: FontWeight.bold)),
-                    SizedBox(height: 8.0),
-                    Text(opportunity.description),
-                    SizedBox(height: 8.0),
-                    DropdownButtonFormField<String>(
-                      value: opportunity.dates[opportunity.selectedDateIndex],
-                      items: opportunity.dates.map((date) {
-                        return DropdownMenuItem<String>(
-                          value: date,
-                          child: Text(date),
-                        );
-                      }).toList(),
-                      onChanged: (String? newDate) {
-                        setState(() {
-                          if (newDate != null) {
-                            opportunity.selectedDateIndex = opportunity.dates.indexOf(newDate);
-                          }
-                        });
-                      },
-                    ),
-                  ],
-                ),
-              ),
-              actions: [
-                ElevatedButton(
-                  onPressed: () {
-                    _updateOpportunity(opportunity);
-                    Navigator.of(dialogContext).pop();
-                  },
-                  child: Text('Update'),
-                ),
-                TextButton(
-                  onPressed: () {
-                    Navigator.of(dialogContext).pop();
-                  },
-                  child: Text('Close'),
-                ),
-              ],
-            );
-          },
-        );
-      },
-    );
-  }
-
-  void _updateOpportunity(Opportunity opportunity) {
-  
-    print('Opportunity updated:');
-    print('Title: ${opportunity.title}');
-    print('Description: ${opportunity.description}');
-    print('Selected Date: ${opportunity.dates[opportunity.selectedDateIndex]}');
-    print('--------------------------------------');
   }
 }
 
-class Opportunity {
-  final String title;
-  final String description;
-  final String imagePath;
-  final List<String> dates;
-  int selectedDateIndex;
-  bool showDetails;
+class OpportunityCard extends ConsumerWidget {
+  final UserOpportunity opportunity;
 
-  Opportunity({
-    required this.title,
-    required this.description,
-    required this.imagePath,
-    required this.dates,
-    this.selectedDateIndex = 0,
-    this.showDetails = false,
-  });
+  const OpportunityCard({required this.opportunity});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    return Card(
+      margin: EdgeInsets.all(8.0),
+      child: Padding(
+        padding: EdgeInsets.all(16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              opportunity.opportunityId.title,
+              style: TextStyle(fontSize: 18.0, fontWeight: FontWeight.bold),
+            ),
+            SizedBox(height: 8.0),
+            Text(opportunity.opportunityId.description),
+            SizedBox(height: 8.0),
+            Text('Selected Date: ${opportunity.selectedDate.toString()}'),
+            SizedBox(height: 8.0),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [
+                TextButton(
+                  onPressed: () {
+                    // Handle editing the opportunity
+                    Navigator.of(context).pushNamed('/editOpportunity',
+                        arguments: opportunity.id);
+                  },
+                  child: Text('Edit'),
+                ),
+                TextButton(
+                  onPressed: () {
+                    // Delete the opportunity using Riverpod
+                    ref.read(userDashboardNotifierProvider.notifier)
+                      .deleteUserOpportunity(opportunity.id)
+                      .then((_) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text('Opportunity deleted successfully'),
+                            duration: Duration(seconds: 2),
+                          ),
+                        );
+                      }).catchError((error) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text('Failed to delete opportunity: $error'),
+                            duration: Duration(seconds: 2),
+                          ),
+                        );
+                      });
+                  },
+                  child: Text(
+                    'Delete',
+                    style: TextStyle(color: Colors.red),
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
 }
