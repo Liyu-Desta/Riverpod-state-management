@@ -1,74 +1,37 @@
 import 'dart:typed_data';
-
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
-import 'dart:io';
-import '../widgets/custom_app_bar.dart'; // Adjust the import path
-import '../widgets/custom_button.dart'; // Adjust the import path
-
-// Import reusable widgets
+import 'package:one/Domain/models/userProfile_model.dart';
+import 'package:one/Infrastructure/data_providers/userProfile_provider.dart';
+import '../widgets/custom_app_bar.dart';
+import '../widgets/custom_button.dart';
 
 void main() {
-  runApp(MaterialApp(
+  runApp(ProviderScope(child: MaterialApp(
     debugShowCheckedModeBanner: false,
     home: UserProfilePage(),
-  ));
+  )));
 }
 
-class UserProfilePage extends StatefulWidget {
+class UserProfilePage extends ConsumerStatefulWidget {
   @override
   _UserProfilePageState createState() => _UserProfilePageState();
 }
 
-class _UserProfilePageState extends State<UserProfilePage> {
-  String _userName = 'Michael';
-  String _email = 'miketherunner@gmail.com';
-  String _phoneNumber = '123-456-7890';
-  String _bio = '';
-  String _location = '';
-  String _interests = '';
-  String _socialMedia = '';
-  Uint8List? _profileImageData; // Storing image bytes directly
+class _UserProfilePageState extends ConsumerState<UserProfilePage> {
   final ScrollController _scrollController = ScrollController();
   bool _showSaveButton = false;
 
   @override
   void initState() {
     super.initState();
-    // Set initial profile image when the page loads
-    _loadInitialImage();
+    ref.read(userProfileNotifierProvider.notifier).fetchUserProfile();
     _scrollController.addListener(_scrollListener);
   }
 
-  void _loadInitialImage() async {
-    // Simulate loading the initial image bytes (replace this with your actual logic)
-    final initialImageBytes =
-        await _loadImageBytesFromPath('images/default_profile.jpg');
-    setState(() {
-      _profileImageData = initialImageBytes;
-    });
-  }
-
-  Future<Uint8List> _loadImageBytesFromPath(String path) async {
-    final file = File(path);
-    return await file.readAsBytes();
-  }
-
-  void _updateProfilePicture() async {
-    final picker = ImagePicker();
-    final pickedFile = await picker.pickImage(source: ImageSource.gallery);
-
-    if (pickedFile != null) {
-      final bytes = await pickedFile.readAsBytes();
-      setState(() {
-        _profileImageData = bytes;
-      });
-    }
-  }
-
   void _scrollListener() {
-    if (_scrollController.offset >=
-        _scrollController.position.maxScrollExtent) {
+    if (_scrollController.offset >= _scrollController.position.maxScrollExtent) {
       setState(() {
         _showSaveButton = true;
       });
@@ -79,157 +42,174 @@ class _UserProfilePageState extends State<UserProfilePage> {
     }
   }
 
+  void _updateProfilePicture(Uint8List profileImageBytes) {
+    ref.read(userProfileNotifierProvider.notifier).updateProfilePicture(profileImageBytes);
+  }
+
+  void _updateField(String fieldName, String value) {
+    final notifier = ref.read(userProfileNotifierProvider.notifier);
+    switch (fieldName) {
+      case 'userName':
+        notifier.updateUserName(value);
+        break;
+      case 'email':
+        notifier.updateEmail(value);
+        break;
+      case 'phoneNumber':
+        notifier.updatePhoneNumber(value);
+        break;
+      case 'bio':
+        notifier.updateBio(value);
+        break;
+      case 'location':
+        notifier.updateLocation(value);
+        break;
+      case 'interests':
+        notifier.updateInterests(value);
+        break;
+      case 'socialMedia':
+        notifier.updateSocialMedia(value);
+        break;
+      default:
+        break;
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
+    final userProfileState = ref.watch(userProfileNotifierProvider);
+
     return Scaffold(
       appBar: CustomAppBar(
         title: 'My Profile',
       ),
-      body: CustomScrollView(
-        controller:
-            _scrollController, // Attach scroll controller to CustomScrollView
-        slivers: [
-          SliverPadding(
-            padding: EdgeInsets.only(
-                bottom: 10), // Add bottom padding to the app bar
-            sliver: SliverPadding(
-              padding: EdgeInsets.all(40),
-              sliver: SliverList(
-                delegate: SliverChildListDelegate(
-                  [
-                    GestureDetector(
-                      onTap: _updateProfilePicture,
-                      child: Container(
-                        height: 120,
-                        width: 120,
-                        decoration: BoxDecoration(
-                          color: Colors.grey[300],
-                          shape: BoxShape.circle,
-                        ),
-                        child: _profileImageData != null
-                            ? CircleAvatar(
-                                backgroundImage:
-                                    MemoryImage(_profileImageData!),
-                                radius: 60,
-                              )
-                            : Center(
-                                child: Icon(
-                                  Icons.camera_alt,
-                                  color: Colors.white,
-                                  size: 40,
-                                ),
-                              ),
-                      ),
-                    ),
-
-                    SizedBox(height: 20),
-                    _buildProfileField(
-                      labelText: 'User Name',
-                      initialValue: _userName,
-                      onChanged: (value) {
-                        setState(() {
-                          _userName = value;
-                        });
-                      },
-                    ),
-                    SizedBox(height: 16.0),
-                    _buildProfileField(
-                      labelText: 'Email',
-                      initialValue: _email,
-                      onChanged: (value) {
-                        setState(() {
-                          _email = value;
-                        });
-                      },
-                    ),
-                    SizedBox(height: 16.0),
-                    _buildProfileField(
-                      labelText: 'Phone Number',
-                      initialValue: _phoneNumber,
-                      onChanged: (value) {
-                        setState(() {
-                          _phoneNumber = value;
-                        });
-                      },
-                    ),
-                    SizedBox(height: 20),
-                    // Divider between profile fields and additional features
-                    Divider(color: Colors.grey),
-                    _buildAdditionalProfileFeature(
-                      icon: Icons.person,
-                      title: 'Bio',
-                      subtitle: 'Add a short description about yourself',
-                      inputValue: _bio,
-                      onTap: (value) {
-                        _showInputDialog(_bio, (value) {
-                          setState(() {
-                            _bio = value;
-                          });
-                        });
-                      },
-                    ),
-
-                    _buildAdditionalProfileFeature(
-                      icon: Icons.location_on,
-                      title: 'Location',
-                      subtitle: 'Add or update your current location',
-                      inputValue: _location,
-                      onTap: (value) {
-                        _showInputDialog(_location, (value) {
-                          setState(() {
-                            _location = value;
-                          });
-                        });
-                      },
-                    ),
-
-                    _buildAdditionalProfileFeature(
-                      icon: Icons.tag,
-                      title: 'Interests',
-                      subtitle: 'Add or update your interests or hobbies',
-                      inputValue: _interests,
-                      onTap: (value) {
-                        _showInputDialog(_interests, (value) {
-                          setState(() {
-                            _interests = value;
-                          });
-                        });
-                      },
-                    ),
-
-                    _buildAdditionalProfileFeature(
-                      icon: Icons.link,
-                      title: 'Social Media',
-                      subtitle: 'Connect your social media profiles',
-                      inputValue: _socialMedia,
-                      onTap: (value) {
-                        _showInputDialog(_socialMedia, (value) {
-                          setState(() {
-                            _socialMedia = value;
-                          });
-                        });
-                      },
-                    ),
-
-                    SizedBox(height: 20),
-                  ],
-                ),
-              ),
-            ),
-          ),
-        ],
-      ),
+      body: userProfileState.isLoading
+          ? Center(child: CircularProgressIndicator())
+          : userProfileState.userProfile == null
+              ? Center(child: Text('Failed to load profile: ${userProfileState.errorMessage}'))
+              : _buildProfileContent(userProfileState.userProfile!),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
       floatingActionButton: Visibility(
         visible: _showSaveButton,
         child: CustomButton(
           text: 'Save',
           onPressed: () {
-            // Placeholder action for saving data
-            print('User Information Saved');
+            _saveUserProfile();
           },
         ),
       ),
+    );
+  }
+
+  Widget _buildProfileContent(UserProfile userProfile) {
+    return CustomScrollView(
+      controller: _scrollController,
+      slivers: [
+        SliverPadding(
+          padding: EdgeInsets.all(40),
+          sliver: SliverList(
+            delegate: SliverChildListDelegate(
+              [
+                GestureDetector(
+                  onTap: () async {
+                    final picker = ImagePicker();
+                    final pickedFile = await picker.pickImage(source: ImageSource.gallery);
+                    if (pickedFile != null) {
+                      final bytes = await pickedFile.readAsBytes();
+                      _updateProfilePicture(bytes);
+                    }
+                  },
+                  child: Container(
+                    height: 120,
+                    width: 120,
+                    decoration: BoxDecoration(
+                      color: Colors.grey[300],
+                      shape: BoxShape.circle,
+                    ),
+                    child: userProfile.profileImageBytes != null
+                        ? CircleAvatar(
+                            backgroundImage: MemoryImage(userProfile.profileImageBytes!),
+                            radius: 60,
+                          )
+                        : Center(
+                            child: Icon(
+                              Icons.camera_alt,
+                              color: Colors.white,
+                              size: 40,
+                            ),
+                          ),
+                  ),
+                ),
+                SizedBox(height: 20),
+                _buildProfileField(
+                  labelText: 'User Name',
+                  initialValue: userProfile.userName,
+                  onChanged: (value) => _updateField('userName', value),
+                ),
+                SizedBox(height: 16.0),
+                _buildProfileField(
+                  labelText: 'Email',
+                  initialValue: userProfile.email,
+                  onChanged: (value) => _updateField('email', value),
+                ),
+                SizedBox(height: 16.0),
+                _buildProfileField(
+                  labelText: 'Phone Number',
+                  initialValue: userProfile.phoneNumber,
+                  onChanged: (value) => _updateField('phoneNumber', value),
+                ),
+                SizedBox(height: 20),
+                Divider(color: Colors.grey),
+                _buildAdditionalProfileFeature(
+                  icon: Icons.person,
+                  title: 'Bio',
+                  subtitle: 'Add a short description about yourself',
+                  inputValue: userProfile.bio,
+                  onTap: (value) {
+                    _showInputDialog(userProfile.bio, (value) {
+                      _updateField('bio', value);
+                    });
+                  },
+                ),
+                _buildAdditionalProfileFeature(
+                  icon: Icons.location_on,
+                  title: 'Location',
+                  subtitle: 'Add or update your current location',
+                  inputValue: userProfile.location,
+                  onTap: (value) {
+                    _showInputDialog(userProfile.location, (value) {
+                      _updateField('location', value);
+                    });
+                  },
+                ),
+                _buildAdditionalProfileFeature(
+                  icon: Icons.tag,
+                  title: 'Interests',
+                  subtitle: 'Add or update your interests or hobbies',
+                  inputValue: userProfile.interests,
+                  onTap: (value) {
+                    _showInputDialog(userProfile.interests, (value) {
+                      _updateField('interests', value);
+                    });
+                  },
+                ),
+                _buildAdditionalProfileFeature(
+                  icon: Icons.link,
+                  title: 'Social Media',
+                  subtitle: 'Connect your social media profiles',
+                  inputValue: userProfile.socialMedia,
+                  onTap: (value) {
+                    _showInputDialog(userProfile.socialMedia, (value) {
+                      _updateField('socialMedia', value);
+                    });
+                  },
+                ),
+                SizedBox(height: 20),
+              ],
+            ),
+          ),
+        ),
+      ],
     );
   }
 
@@ -277,22 +257,22 @@ class _UserProfilePageState extends State<UserProfilePage> {
           subtitle: Text(
             subtitle,
             style: TextStyle(
-              color: Colors.grey, // Set subtitle color to grey
+              color: Colors.grey,
               fontFamily: 'Roboto',
             ),
           ),
           onTap: () {
-            onTap(inputValue); // Pass inputValue to onTap callback
+            onTap(inputValue);
           },
         ),
-        if (inputValue.isNotEmpty) // Only show input value if not empty
+        if (inputValue.isNotEmpty)
           Container(
             padding: EdgeInsets.symmetric(horizontal: 16),
             alignment: Alignment.centerLeft,
             child: Text(
               inputValue,
               style: TextStyle(
-                color: Colors.black, // Set input value color to black
+                color: Colors.black,
                 fontFamily: 'Roboto',
               ),
             ),
@@ -311,7 +291,7 @@ class _UserProfilePageState extends State<UserProfilePage> {
         return AlertDialog(
           title: Text('Enter'),
           content: TextFormField(
-            initialValue: initialValue, // Set initial value for editing
+            initialValue: initialValue,
             onChanged: (value) => inputValue = value,
             decoration: InputDecoration(
               hintText: 'Enter',
@@ -320,14 +300,14 @@ class _UserProfilePageState extends State<UserProfilePage> {
           actions: [
             ElevatedButton(
               onPressed: () {
-                Navigator.pop(context); // Close dialog
+                Navigator.pop(context);
               },
               child: Text('Cancel'),
             ),
             ElevatedButton(
               onPressed: () {
-                onSave(inputValue); // Save input value
-                Navigator.pop(context); // Close dialog
+                onSave(inputValue);
+                Navigator.pop(context);
               },
               child: Text('Ok'),
             ),
@@ -335,5 +315,17 @@ class _UserProfilePageState extends State<UserProfilePage> {
         );
       },
     );
+  }
+
+  void _saveUserProfile() {
+    final notifier = ref.read(userProfileNotifierProvider.notifier);
+    final userProfile = ref.read(userProfileNotifierProvider).userProfile!;
+    notifier.updateUserName(userProfile.userName);
+    notifier.updateEmail(userProfile.email);
+    notifier.updatePhoneNumber(userProfile.phoneNumber);
+    notifier.updateBio(userProfile.bio);
+    notifier.updateLocation(userProfile.location);
+    notifier.updateInterests(userProfile.interests);
+    notifier.updateSocialMedia(userProfile.socialMedia);
   }
 }

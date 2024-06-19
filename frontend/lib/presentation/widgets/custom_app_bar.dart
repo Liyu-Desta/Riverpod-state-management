@@ -6,7 +6,7 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
 
   const CustomAppBar({
     required this.title,
-    this.leadingOnPressed,
+    this.leadingOnPressed, List<IconButton>? actions,
   });
 
   @override

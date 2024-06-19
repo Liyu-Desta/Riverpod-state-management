@@ -1,38 +1,33 @@
 import 'dart:typed_data';
-
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
-import 'dart:io';
-import '../widgets/custom_app_bar.dart'; // Adjust the import path
-import '../widgets/custom_button.dart'; // Adjust the import path
-import '../widgets/custom_alert_dialog.dart'; // Adjust the import path
+import 'package:one/Domain/models/adminProfile_model.dart';
 
-void main() {
-  runApp(MaterialApp(
-    debugShowCheckedModeBanner: false,
-    home: AdminProfilePage(),
-  ));
-}
+import 'package:one/Infrastructure/data_providers/adminProfile_provider.dart';
+import 'package:one/presentation/widgets/custom_alert_dialog.dart';
+import 'package:one/presentation/widgets/custom_app_bar.dart';
+import 'package:one/presentation/widgets/custom_button.dart';
 
-class AdminProfilePage extends StatefulWidget {
+class AdminProfilePage extends ConsumerStatefulWidget {
   @override
   _AdminProfilePageState createState() => _AdminProfilePageState();
 }
 
-class _AdminProfilePageState extends State<AdminProfilePage> {
-  String _adminName = 'Sebastian Goddard';
-  String _email = 'Sabastiangoddard12@gmail.com';
-  String _phoneNumber = '123-456-7890';
-  String _password = '';
+class _AdminProfilePageState extends ConsumerState<AdminProfilePage> {
+  String _adminName = '';
+  String _email = '';
+  String _phoneNumber = '';
   Uint8List? _profileImageData;
   bool _showSaveButton = false;
+  String _password = '';
 
   final ScrollController _scrollController = ScrollController();
 
   @override
   void initState() {
     super.initState();
-    _loadInitialImage();
+    ref.read(adminProfileNotifierProvider.notifier).fetchAdminProfile();
     _scrollController.addListener(_scrollListener);
   }
 
@@ -42,17 +37,16 @@ class _AdminProfilePageState extends State<AdminProfilePage> {
     super.dispose();
   }
 
-  void _loadInitialImage() async {
-    final initialImageBytes =
-        await _loadImageBytesFromPath('images/default_profile.jpg');
-    setState(() {
-      _profileImageData = initialImageBytes;
-    });
-  }
-
-  Future<Uint8List> _loadImageBytesFromPath(String path) async {
-    final file = File(path);
-    return await file.readAsBytes();
+  void _scrollListener() {
+    if (_scrollController.offset >= _scrollController.position.maxScrollExtent) {
+      setState(() {
+        _showSaveButton = true;
+      });
+    } else {
+      setState(() {
+        _showSaveButton = false;
+      });
+    }
   }
 
   void _updateProfilePicture() async {
@@ -64,12 +58,12 @@ class _AdminProfilePageState extends State<AdminProfilePage> {
       setState(() {
         _profileImageData = bytes;
       });
+
+      ref.read(adminProfileNotifierProvider.notifier).updateProfilePicture(bytes);
     }
   }
 
   void _changePassword() {
-    _password = '';
-
     showDialog(
       context: context,
       builder: (BuildContext context) {
@@ -117,7 +111,7 @@ class _AdminProfilePageState extends State<AdminProfilePage> {
             ElevatedButton(
               onPressed: _password.length >= 8
                   ? () {
-                      print('Password changed');
+                      ref.read(adminProfileNotifierProvider.notifier).changePassword(_password);
                       Navigator.of(context).pop();
                     }
                   : null,
@@ -130,194 +124,100 @@ class _AdminProfilePageState extends State<AdminProfilePage> {
   }
 
   void _saveAdminInformation() {
-    print('Admin information saved');
-  }
+    final updatedProfile = AdminProfile(
+      adminName: _adminName,
+      email: _email,
+      phoneNumber: _phoneNumber,
+      profileImageBytes: _profileImageData,
+    );
 
-  void _scrollListener() {
-    if (_scrollController.offset >=
-        _scrollController.position.maxScrollExtent) {
-      setState(() {
-        _showSaveButton = true;
-      });
-    } else {
-      setState(() {
-        _showSaveButton = false;
-      });
-    }
+    ref.read(adminProfileNotifierProvider.notifier).saveAdminProfile();
   }
 
   @override
   Widget build(BuildContext context) {
+    final adminProfileState = ref.watch(adminProfileNotifierProvider);
+
     return Scaffold(
       appBar: CustomAppBar(
         title: 'Admin Profile',
+        actions: _showSaveButton
+            ? [
+                IconButton(
+                  icon: Icon(Icons.save),
+                  onPressed: _saveAdminInformation,
+                ),
+              ]
+            : null,
       ),
-      body: CustomScrollView(
-        controller: _scrollController,
-        slivers: <Widget>[
-          SliverPadding(
-            padding: EdgeInsets.all(20),
-            sliver: SliverList(
-              delegate: SliverChildListDelegate(
-                [
-                  Center(
-                    child: GestureDetector(
-                      onTap: _updateProfilePicture,
-                      child: Container(
-                        height: 120,
-                        width: 120,
-                        decoration: BoxDecoration(
-                          color: Colors.grey[300],
-                          shape: BoxShape.circle,
+      body: adminProfileState.isLoading
+          ? Center(child: CircularProgressIndicator())
+          : adminProfileState.errorMessage != null
+              ? Center(child: Text(adminProfileState.errorMessage!))
+              : SingleChildScrollView(
+                  controller: _scrollController,
+                  child: Padding(
+                    padding: const EdgeInsets.all(16.0),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        CircleAvatar(
+                          radius: 50,
+                          backgroundImage: _profileImageData != null
+                              ? MemoryImage(_profileImageData!)
+                              : adminProfileState.adminProfile?.profileImageBytes != null
+                                  ? MemoryImage(adminProfileState.adminProfile!.profileImageBytes!)
+                                  : null,
                         ),
-                        child: _profileImageData != null
-                            ? CircleAvatar(
-                                backgroundImage:
-                                    MemoryImage(_profileImageData!),
-                                radius: 60,
-                              )
-                            : Center(
-                                child: Icon(
-                                  Icons.camera_alt,
-                                  color: Colors.white,
-                                  size: 40,
-                                ),
-                              ),
-                      ),
+                        TextButton(
+                          onPressed: _updateProfilePicture,
+                          child: Text('Change Profile Picture'),
+                        ),
+                        SizedBox(height: 16),
+                        TextFormField(
+                          initialValue: adminProfileState.adminProfile?.adminName,
+                          decoration: InputDecoration(
+                            labelText: 'Admin Name',
+                          ),
+                          onChanged: (value) {
+                            setState(() {
+                              _adminName = value;
+                            });
+                          },
+                        ),
+                        SizedBox(height: 16),
+                        TextFormField(
+                          initialValue: adminProfileState.adminProfile?.email,
+                          decoration: InputDecoration(
+                            labelText: 'Email',
+                          ),
+                          onChanged: (value) {
+                            setState(() {
+                              _email = value;
+                            });
+                          },
+                        ),
+                        SizedBox(height: 16),
+                        TextFormField(
+                          initialValue: adminProfileState.adminProfile?.phoneNumber,
+                          decoration: InputDecoration(
+                            labelText: 'Phone Number',
+                          ),
+                          onChanged: (value) {
+                            setState(() {
+                              _phoneNumber = value;
+                            });
+                          },
+                        ),
+                        SizedBox(height: 16),
+                        ElevatedButton(
+                          onPressed: _changePassword,
+                          child: Text('Change Password'),
+                        ),
+                      ],
                     ),
                   ),
-                  SizedBox(height: 60),
-                  _buildProfileField(
-                    labelText: 'Admin Name',
-                    initialValue: _adminName,
-                    onChanged: (value) {
-                      setState(() {
-                        _adminName = value;
-                      });
-                    },
-                  ),
-                  SizedBox(height: 16.0),
-                  _buildProfileField(
-                    labelText: 'Email',
-                    initialValue: _email,
-                    onChanged: (value) {
-                      setState(() {
-                        _email = value;
-                      });
-                    },
-                  ),
-                  SizedBox(height: 16.0),
-                  _buildProfileField(
-                    labelText: 'Phone Number',
-                    initialValue: _phoneNumber,
-                    onChanged: (value) {
-                      setState(() {
-                        _phoneNumber = value;
-                      });
-                    },
-                  ),
-                  SizedBox(height: 20),
-                  Divider(color: Colors.grey),
-                  SizedBox(height: 10),
-                  _buildAdditionalFeatures(),
-                  SizedBox(height: 20),
-                ],
-              ),
-            ),
-          ),
-        ],
-      ),
-      floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
-      floatingActionButton: Visibility(
-        visible: _showSaveButton,
-        child: CustomButton(
-          text: 'Save',
-          onPressed: _saveAdminInformation,
-        ),
-      ),
-    );
-  }
-
-  Widget _buildProfileField({
-    required String labelText,
-    required String initialValue,
-    required ValueChanged<String> onChanged,
-  }) {
-    return TextFormField(
-      initialValue: initialValue,
-      decoration: InputDecoration(
-        labelText: labelText,
-        border: OutlineInputBorder(),
-        filled: true,
-        fillColor: Colors.grey[200],
-        suffixIcon: Icon(Icons.edit, color: Colors.purple),
-        labelStyle: TextStyle(
-          color: Colors.purple,
-          fontFamily: 'Roboto',
-        ),
-      ),
-      onChanged: onChanged,
-    );
-  }
-
-  Widget _buildAdditionalFeatures() {
-    return Column(
-      children: [
-        _buildAdditionalFeature(
-          icon: Icons.security,
-          title: 'Security Settings',
-          subtitle: 'Manage security preferences',
-          onTap: () {
-            // Implement security settings functionality
-          },
-        ),
-        _buildAdditionalFeature(
-          icon: Icons.settings,
-          title: 'App Settings',
-          subtitle: 'Customize app preferences',
-          onTap: () {
-            // Implement app settings functionality
-          },
-        ),
-        _buildAdditionalFeature(
-          icon: Icons.vpn_key,
-          title: 'Change Password',
-          subtitle: 'Change your login password',
-          onTap: _changePassword,
-        ),
-      ],
-    );
-  }
-
-  Widget _buildAdditionalFeature({
-    required IconData icon,
-    required String title,
-    required String subtitle,
-    required VoidCallback onTap,
-  }) {
-    return Column(
-      children: [
-        ListTile(
-          leading: Icon(icon, color: Colors.purple),
-          title: Text(
-            title,
-            style: TextStyle(
-              color: Colors.purple,
-              fontWeight: FontWeight.bold,
-              fontFamily: 'Roboto',
-            ),
-          ),
-          subtitle: Text(
-            subtitle,
-            style: TextStyle(
-              color: Colors.grey,
-              fontFamily: 'Roboto',
-            ),
-          ),
-          onTap: onTap,
-        ),
-        Divider(color: Colors.grey),
-      ],
+                ),
     );
   }
 }
